@@ -14,6 +14,7 @@ public class Servidor {
     public static void main(String[] args) throws IOException {
     	inicializaServidor();
     	System.out.println("Tecle enter para parar o servidor...");
+    	System.in.read();
     	finalizaServidor();
     }		
         
