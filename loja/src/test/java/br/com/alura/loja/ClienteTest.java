@@ -8,6 +8,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.grizzly.http.server.HttpServer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,14 +21,20 @@ import br.com.alura.loja.modelo.Produto;
 
 public class ClienteTest {
 	
+	private HttpServer server;
+	private WebTarget target;
+	private Client client;
+	
 	@Before
 	public void levantaServidor() {
-		Servidor.inicializaServidor();
+		server = Servidor.inicializaServidor();
+		this.client = ClientBuilder.newClient();
+		this.target = client.target("http://localhost:8080");
 	}
 	
 	@After
 	public void derrubaServidor() {		 
-        Servidor.finalizaServidor();
+        server.stop();
 	}
 	
 	
@@ -50,18 +57,18 @@ public class ClienteTest {
 	
 	@Test
     public void testaQueSuportaNovosCarrinhos(){
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:8080");
         Carrinho carrinho = new Carrinho();
-        carrinho.adiciona(new Produto(314L, "Tablet", 999, 1));
+        carrinho.adiciona(new Produto(314L, "Microfone", 999, 1));
         carrinho.setRua("Rua Vergueiro");
         carrinho.setCidade("Sao Paulo");
         String xml = carrinho.toXML();
-
         Entity<String> entity = Entity.entity(xml, MediaType.APPLICATION_XML);
 
         Response response = target.path("/carrinhos").request().post(entity);
-        Assert.assertEquals("<status>sucesso</status>", response.readEntity(String.class));
+        Assert.assertEquals(201, response.getStatus());
+        String location = response.getHeaderString("Location");
+        String conteudo = client.target(location).request().get(String.class);
+        Assert.assertTrue(conteudo.contains("Microfone"));
     }
 
 }
