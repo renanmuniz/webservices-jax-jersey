@@ -44,14 +44,5 @@ public class CarrinhoDAO {
 	public Carrinho remove(long id) {
 		return banco.remove(id);
 	}
-	
-	@POST
-	@Consumes(MediaType.APPLICATION_XML)
-    public Response adiciona(String conteudo) {
-       Carrinho carrinho = (Carrinho) new XStream().fromXML(conteudo);
-       new CarrinhoDAO().adiciona(carrinho);
-       URI uri = URI.create("/carrinhos/" + carrinho.getId());
-       return Response.created(uri).build();
-   }
 
 }
